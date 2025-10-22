@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUser } from "./users";
+import { internalMutation, internalQuery } from "./_generated/server";
 
 export const list = query({
   args: {},
@@ -68,6 +69,48 @@ export const updateVisit = mutation({
 
     const website = await ctx.db.get(args.websiteId);
     if (!website || website.userId !== user._id) {
+      throw new Error("Website not found");
+    }
+
+    await ctx.db.patch(args.websiteId, {
+      lastVisited: Date.now(),
+      visitCount: website.visitCount + 1,
+    });
+  },
+});
+
+export const internalGetByUrl = internalQuery({
+  args: { url: v.string(), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("websites")
+      .withIndex("by_url", (q) => q.eq("url", args.url))
+      .first();
+  },
+});
+
+export const internalCreate = internalMutation({
+  args: {
+    url: v.string(),
+    name: v.string(),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("websites", {
+      userId: args.userId,
+      url: args.url,
+      name: args.name,
+      lastVisited: Date.now(),
+      visitCount: 1,
+    });
+  },
+});
+
+export const internalUpdateVisit = internalMutation({
+  args: { websiteId: v.id("websites") },
+  handler: async (ctx, args) => {
+    const website = await ctx.db.get(args.websiteId);
+    if (!website) {
       throw new Error("Website not found");
     }
 

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { getCurrentUser } from "./users";
 import { cookieCategoryValidator } from "./schema";
 
@@ -49,5 +49,30 @@ export const getStats = query({
       thirdParty: filtered.filter((c) => c.isThirdParty).length,
       firstParty: filtered.filter((c) => !c.isThirdParty).length,
     };
+  },
+});
+
+export const create = internalMutation({
+  args: {
+    websiteId: v.id("websites"),
+    name: v.string(),
+    category: cookieCategoryValidator,
+    domain: v.string(),
+    isThirdParty: v.boolean(),
+    purpose: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const website = await ctx.db.get(args.websiteId);
+    if (!website) throw new Error("Website not found");
+
+    return await ctx.db.insert("cookies", {
+      userId: website.userId,
+      websiteId: args.websiteId,
+      name: args.name,
+      category: args.category,
+      domain: args.domain,
+      isThirdParty: args.isThirdParty,
+      purpose: args.purpose,
+    });
   },
 });

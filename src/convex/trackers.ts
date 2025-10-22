@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { getCurrentUser } from "./users";
 
 export const list = query({
@@ -23,7 +23,7 @@ export const list = query({
   },
 });
 
-export const create = mutation({
+export const create = internalMutation({
   args: {
     websiteId: v.id("websites"),
     type: v.string(),
@@ -31,11 +31,11 @@ export const create = mutation({
     blocked: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-    if (!user) throw new Error("Unauthorized");
+    const website = await ctx.db.get(args.websiteId);
+    if (!website) throw new Error("Website not found");
 
     return await ctx.db.insert("trackers", {
-      userId: user._id,
+      userId: website.userId,
       websiteId: args.websiteId,
       type: args.type,
       domain: args.domain,
