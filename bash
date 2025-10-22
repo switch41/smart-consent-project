@@ -1,14 +1,6 @@
-# Initialize git (if not already done)
-git init
-
-# Add the remote repository
+git config user.email "kushalparihar013@gmail.com"
+git config user.name "Kushal Parihar"
 git remote add origin https://github.com/switch41/smart-consentmanager.git
-
-# Add all files
 git add .
-
-# Commit the changes
-git commit -m "Initial commit: Smart Consent Manager with all features"
-
-# Push to GitHub
+git commit -m "Smart Consent Manager - Complete implementation with diagrams"
 git push -u origin main
