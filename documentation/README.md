@@ -1,147 +1,154 @@
-# Smart Consent Manager - Technical Documentation
+# Smart Consent Manager - Documentation
 
-## Overview
+## Project Overview
 
-The Smart Consent Manager is a comprehensive privacy management application that helps users understand and control their digital footprint across the web. This documentation provides detailed diagrams and technical specifications for the system.
-
-## Documentation Contents
-
-1. **[Activity Diagram](./activity-diagram.md)** - Visualizes user workflows and system processes
-   - User website scanning flow
-   - Admin analytics flow
-   - Consent management flow
-
-2. **[Use Case Diagram](./use-case-diagram.md)** - Defines system actors and their interactions
-   - User use cases (scan, consent, report)
-   - Admin use cases (analytics, monitoring)
-   - System use cases (risk assessment, tracking)
-
-3. **[Architecture Diagram](./architecture-diagram.md)** - Shows system structure and components
-   - Frontend layer (React, Vite, Tailwind)
-   - Backend layer (Convex functions)
-   - Database layer (Convex DB)
-   - Authentication layer (Convex Auth)
-   - Technology stack overview
-
-4. **[Sequence Diagram](./sequence-diagram.md)** - Illustrates component interactions over time
-   - User authentication flow
-   - Website scanning flow
-   - Consent management flow
-   - Privacy report generation
-   - Admin analytics flow
-   - Real-time data subscription
+The Smart Consent Manager is a comprehensive web application designed to help users understand and control their digital privacy. It provides tools for tracking cookies, managing consent preferences, detecting trackers, and assessing privacy risks across websites.
 
 ## Technology Stack
 
 ### Frontend
-- **React 19** - UI framework
 - **Vite** - Build tool and dev server
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind v4** - Utility-first CSS
+- **React 19** - UI framework
+- **TypeScript** - Type-safe development
+- **Tailwind CSS v4** - Utility-first styling
 - **Shadcn UI** - Component library
-- **React Router v7** - Client-side routing
 - **Framer Motion** - Animation library
+- **React Router v7** - Client-side routing
 - **Lucide Icons** - Icon library
 
 ### Backend
 - **Convex** - Backend-as-a-Service
-- **Convex Database** - Real-time database
 - **Convex Auth** - Authentication system
-- **Node.js Runtime** - For external API calls
+- **Node.js Runtime** - For actions requiring external APIs
 
-### Development Tools
-- **PNPM** - Package manager
-- **TypeScript Compiler** - Type checking
-- **ESLint** - Code linting
+### Database
+- **Convex DB** - Real-time reactive database
+
+## Documentation Index
+
+### 1. [Activity Diagram](./activity-diagram.md)
+Visualizes the workflow and processes within the application:
+- User Website Scanning Flow
+- Consent Management Flow
+- Admin Analytics Flow
+
+### 2. [Use Case Diagram](./use-case-diagram.md)
+Defines system actors and their interactions:
+- User use cases (scanning, consent management, viewing reports)
+- Admin use cases (analytics, system monitoring)
+- System automated processes
+
+### 3. [Architecture Diagram](./architecture-diagram.md)
+Details the system architecture:
+- System Architecture Overview
+- Technology Stack
+- Data Flow Architecture
+- Component Architecture
+
+### 4. [Sequence Diagram](./sequence-diagram.md)
+Illustrates the interaction flows:
+- User Authentication Flow
+- Website Scanning Flow
+- Consent Management Flow
+- Privacy Report Generation
+- Dashboard Stats Loading
+- Admin Analytics Flow
 
 ## Key Features
 
-1. **Website Scanning** - Detect cookies and trackers on any website
-2. **Consent Management** - Grant, deny, or revoke consent for different cookie categories
-3. **Privacy Score** - Real-time privacy score based on browsing habits
-4. **Risk Assessment** - AI-powered risk analysis for websites
-5. **Gamification** - Earn points for privacy-conscious actions
-6. **Privacy Reports** - Comprehensive privacy reports with statistics
-7. **Admin Analytics** - System-wide consent statistics and trends
-8. **Real-time Updates** - Live data synchronization across all components
+### 1. Website Scanning
+- Detects cookies (essential, analytics, marketing, third-party)
+- Identifies third-party trackers
+- Performs risk assessment
+- Calculates privacy scores
+
+### 2. Consent Management
+- Grant/deny consent by category
+- Revoke existing consents
+- Set expiry dates and auto-renewal
+- Track consent history
+
+### 3. Privacy Reporting
+- Comprehensive privacy reports
+- Cookie and tracker statistics
+- Risk level visualization
+- Consent status overview
+
+### 4. Gamification
+- Points system for privacy-conscious behavior
+- Achievements and milestones
+- Privacy score tracking
+
+### 5. Analytics Dashboard
+- Real-time statistics
+- Trend analysis
+- Category breakdowns
+- Acceptance rate tracking
 
 ## Database Schema
 
 ### Tables
 - **users** - User accounts and profiles
 - **websites** - Scanned websites
-- **cookies** - Detected cookies with categorization
+- **cookies** - Detected cookies
 - **trackers** - Third-party trackers
 - **consents** - User consent preferences
 - **riskAssessments** - Website risk evaluations
 
+## Authentication
+
+The application supports two authentication methods:
+1. **Email OTP** - One-time password sent via email
+2. **Anonymous** - Guest access without registration
+
 ## API Structure
 
 ### Queries (Read Operations)
-- Real-time data subscriptions
-- Automatic re-execution on data changes
-- Type-safe with TypeScript
+- User data retrieval
+- Website listings
+- Cookie and tracker queries
+- Consent history
+- Analytics data
 
 ### Mutations (Write Operations)
-- Transactional database updates
-- Optimistic UI updates
-- Automatic rollback on errors
+- User updates
+- Consent management
+- Website visit tracking
+- Data modifications
 
 ### Actions (External Operations)
-- Node.js runtime for external APIs
-- Website scanning and analysis
-- Email sending for OTP
-
-## Authentication Flow
-
-1. User enters email address
-2. System sends OTP code via email
-3. User enters OTP code
-4. System verifies and creates session
-5. User redirected to dashboard
-
-Alternative: Guest login (anonymous authentication)
+- Website scanning
+- Email sending
+- Risk assessment calculations
+- Privacy score updates
 
 ## Deployment
 
-The application is deployed with:
-- Frontend: Vite production build
-- Backend: Convex cloud deployment
-- Database: Convex managed database
-- Authentication: Convex Auth service
+The application is designed to run on:
+- **Frontend**: Vite dev server / Static hosting
+- **Backend**: Convex cloud infrastructure
+- **Database**: Convex managed database
 
-## Security Features
+## Development Setup
 
-- Email OTP authentication
-- Session management
-- Role-based access control (User/Admin)
-- Secure API endpoints
-- Data encryption at rest
+1. Install dependencies: `pnpm install`
+2. Start Convex dev: `npx convex dev`
+3. Start frontend: `pnpm dev`
+4. Access at: `http://localhost:5173`
+
+## Security Considerations
+
+- All user data is scoped to authenticated users
+- Consent preferences are private and user-specific
+- Risk assessments are performed server-side
+- Authentication tokens are securely managed
+- HTTPS enforced for all communications
 
 ## Future Enhancements
 
-- Browser extension for automatic scanning
-- Export/import privacy data
-- Advanced AI risk assessment
+- Browser extension for real-time tracking
+- Export/import functionality
+- Advanced AI-powered risk detection
 - Multi-language support
-- Mobile application
-
-## Viewing Diagrams
-
-All diagrams are written in Mermaid syntax and can be viewed:
-1. In GitHub (automatic rendering)
-2. In VS Code with Mermaid extension
-3. On [Mermaid Live Editor](https://mermaid.live)
-4. In any Markdown viewer with Mermaid support
-
-## Contributing
-
-When updating diagrams:
-1. Use Mermaid syntax for consistency
-2. Keep diagrams focused and readable
-3. Update this README if adding new diagrams
-4. Test rendering before committing
-
-## License
-
-This documentation is part of the Smart Consent Manager project.
+- Mobile applications
+- Integration with privacy regulations (GDPR, CCPA)
