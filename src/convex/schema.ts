@@ -16,28 +16,97 @@ export const roleValidator = v.union(
 );
 export type Role = Infer<typeof roleValidator>;
 
+export const cookieCategoryValidator = v.union(
+  v.literal("essential"),
+  v.literal("analytics"),
+  v.literal("marketing"),
+  v.literal("thirdParty"),
+);
+
+export const consentStatusValidator = v.union(
+  v.literal("granted"),
+  v.literal("denied"),
+  v.literal("pending"),
+);
+
+export const riskLevelValidator = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("critical"),
+);
+
 const schema = defineSchema(
   {
-    // default auth tables using convex auth.
-    ...authTables, // do not remove or modify
+    ...authTables,
 
-    // the users table is the default users table that is brought in by the authTables
     users: defineTable({
-      name: v.optional(v.string()), // name of the user. do not remove
-      image: v.optional(v.string()), // image of the user. do not remove
-      email: v.optional(v.string()), // email of the user. do not remove
-      emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
-      isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
+      name: v.optional(v.string()),
+      image: v.optional(v.string()),
+      email: v.optional(v.string()),
+      emailVerificationTime: v.optional(v.number()),
+      isAnonymous: v.optional(v.boolean()),
+      role: v.optional(roleValidator),
+      privacyScore: v.optional(v.number()),
+      gamificationPoints: v.optional(v.number()),
+    }).index("email", ["email"]),
 
-      role: v.optional(roleValidator), // role of the user. do not remove
-    }).index("email", ["email"]), // index for the email. do not remove or modify
+    websites: defineTable({
+      userId: v.id("users"),
+      url: v.string(),
+      name: v.string(),
+      lastVisited: v.number(),
+      visitCount: v.number(),
+    })
+      .index("by_userId", ["userId"])
+      .index("by_url", ["url"]),
 
-    // add other tables here
+    cookies: defineTable({
+      userId: v.id("users"),
+      websiteId: v.id("websites"),
+      name: v.string(),
+      category: cookieCategoryValidator,
+      domain: v.string(),
+      expiryDate: v.optional(v.number()),
+      isThirdParty: v.boolean(),
+      purpose: v.optional(v.string()),
+    })
+      .index("by_userId", ["userId"])
+      .index("by_websiteId", ["websiteId"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    trackers: defineTable({
+      userId: v.id("users"),
+      websiteId: v.id("websites"),
+      type: v.string(),
+      domain: v.string(),
+      blocked: v.boolean(),
+      detectedAt: v.number(),
+    })
+      .index("by_userId", ["userId"])
+      .index("by_websiteId", ["websiteId"]),
+
+    consents: defineTable({
+      userId: v.id("users"),
+      websiteId: v.id("websites"),
+      category: cookieCategoryValidator,
+      status: consentStatusValidator,
+      timestamp: v.number(),
+      expiresAt: v.optional(v.number()),
+      autoRenew: v.boolean(),
+    })
+      .index("by_userId", ["userId"])
+      .index("by_websiteId", ["websiteId"]),
+
+    riskAssessments: defineTable({
+      userId: v.id("users"),
+      websiteId: v.id("websites"),
+      riskLevel: riskLevelValidator,
+      factors: v.array(v.string()),
+      score: v.number(),
+      assessedAt: v.number(),
+    })
+      .index("by_userId", ["userId"])
+      .index("by_websiteId", ["websiteId"]),
   },
   {
     schemaValidation: false,
