@@ -17,6 +17,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.0.1
         version: 5.0.1(react-hook-form@7.57.0(react@19.1.0))
+      '@huggingface/inference':
+        specifier: ^4.13.1
+        version: 4.13.1
       '@jridgewell/trace-mapping':
         specifier: ^0.3.25
         version: 0.3.25
@@ -731,6 +734,17 @@ packages:
     resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
     peerDependencies:
       react-hook-form: ^7.55.0
+
+  '@huggingface/inference@4.13.1':
+    resolution: {integrity: sha512-tP63myCjsH+2CqkOaDklJ9MDpUzp6esGMS7RHFXpfv66DWub43kaGTDpI49arqLXM+yFH6FW868eIDgespw5Uw==}
+    engines: {node: '>=18'}
+
+  '@huggingface/jinja@0.5.1':
+    resolution: {integrity: sha512-yUZLld4lrM9iFxHCwFQ7D1HW2MWMwSbeB7WzWqFYDWK+rEb+WldkLdAJxUPOmgICMHZLzZGVcVjFh3w/YGubng==}
+    engines: {node: '>=18'}
+
+  '@huggingface/tasks@0.19.63':
+    resolution: {integrity: sha512-hmd8e5fdjRiIJE7/EYWXS+Pm2SAu89xjZEgfZddN10ubWqlelXLyj2YgHZrVDEVkVA+5+ImMZUpQIez7b2//fw==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3683,6 +3697,15 @@ snapshots:
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.57.0(react@19.1.0)
+
+  '@huggingface/inference@4.13.1':
+    dependencies:
+      '@huggingface/jinja': 0.5.1
+      '@huggingface/tasks': 0.19.63
+
+  '@huggingface/jinja@0.5.1': {}
+
+  '@huggingface/tasks@0.19.63': {}
 
   '@humanfs/core@0.19.1': {}
 

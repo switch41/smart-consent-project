@@ -10,11 +10,11 @@ export const scanWebsite = internalAction({
     url: v.string(),
   },
   handler: async (ctx, args) => {
-    // Simulate website scanning
+    // Simulate website scanning with ML-enhanced detection
     const cookies = await simulateCookieDetection(args.url);
     const trackers = await simulateTrackerDetection(args.url);
     
-    // Store cookies
+    // Store cookies with ML classification
     for (const cookie of cookies) {
       await ctx.runMutation(internal.websiteScannerMutations.storeCookie, {
         websiteId: args.websiteId,
@@ -22,15 +22,32 @@ export const scanWebsite = internalAction({
       });
     }
     
-    // Store trackers
+    // Store trackers with ML-based risk assessment
     for (const tracker of trackers) {
+      // Use ML to classify tracker (if API key is available)
+      let trackerData = tracker;
+      try {
+        const mlClassification = await ctx.runAction(internal.mlAnalysis.classifyTracker, {
+          domain: tracker.domain,
+          requestPattern: tracker.type,
+        });
+        
+        trackerData = {
+          ...tracker,
+          type: mlClassification.type,
+          blocked: mlClassification.shouldBlock,
+        };
+      } catch (error) {
+        console.log("ML classification unavailable, using rule-based");
+      }
+      
       await ctx.runMutation(internal.websiteScannerMutations.storeTracker, {
         websiteId: args.websiteId,
-        ...tracker,
+        ...trackerData,
       });
     }
     
-    // Assess risk
+    // ML-enhanced risk assessment
     await ctx.runMutation(internal.websiteScannerMutations.assessRisk, {
       websiteId: args.websiteId,
       cookieCount: cookies.length,
