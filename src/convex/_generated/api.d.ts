@@ -22,6 +22,8 @@ import type * as gamification from "../gamification.js";
 import type * as http from "../http.js";
 import type * as mlAnalysis from "../mlAnalysis.js";
 import type * as mlExplainability from "../mlExplainability.js";
+import type * as mlPredictions from "../mlPredictions.js";
+import type * as mlPredictionsHelpers from "../mlPredictionsHelpers.js";
 import type * as privacyScore from "../privacyScore.js";
 import type * as riskAssessments from "../riskAssessments.js";
 import type * as seedData from "../seedData.js";
@@ -50,6 +52,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   mlAnalysis: typeof mlAnalysis;
   mlExplainability: typeof mlExplainability;
+  mlPredictions: typeof mlPredictions;
+  mlPredictionsHelpers: typeof mlPredictionsHelpers;
   privacyScore: typeof privacyScore;
   riskAssessments: typeof riskAssessments;
   seedData: typeof seedData;

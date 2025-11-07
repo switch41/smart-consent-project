@@ -11,6 +11,7 @@ import { WebsiteScanner } from "@/components/WebsiteScanner";
 import { ConsentManager } from "@/components/ConsentManager";
 import { PrivacyReport } from "@/components/PrivacyReport";
 import { useDarkMode } from "@/hooks/use-dark-mode";
+import { ModelInteraction } from "@/components/ModelInteraction";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
@@ -65,11 +66,12 @@ export default function Dashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="scanner">Scanner</TabsTrigger>
             <TabsTrigger value="consents">Consents</TabsTrigger>
             <TabsTrigger value="report">Report</TabsTrigger>
+            <TabsTrigger value="ml">ML Models</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -160,6 +162,10 @@ export default function Dashboard() {
 
           <TabsContent value="report">
             <PrivacyReport />
+          </TabsContent>
+
+          <TabsContent value="ml">
+            <ModelInteraction />
           </TabsContent>
         </Tabs>
       </main>
