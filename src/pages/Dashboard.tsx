@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Cookie, Eye, TrendingUp, Moon, Sun, Clock } from "lucide-react";
+import { Shield, Cookie, Eye, TrendingUp, Moon, Sun, Clock, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WebsiteScanner } from "@/components/WebsiteScanner";
@@ -21,7 +21,7 @@ export default function Dashboard() {
   const stats = useQuery(api.analytics.getDashboardStats);
   const [activeTab, setActiveTab] = useState("overview");
   const { isDark, toggle } = useDarkMode();
-  const { sessionStats, extendSession } = useBrowserSession();
+  const { sessionStats, extendSession, isActive } = useBrowserSession();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -46,6 +46,14 @@ export default function Dashboard() {
             <h1 className="text-xl font-bold tracking-tight">Smart Consent Manager</h1>
           </div>
           <div className="flex items-center gap-3">
+            {isActive && sessionStats && (
+              <Badge variant="outline" className="flex items-center gap-2">
+                <Activity className="h-3 w-3 animate-pulse text-green-600" />
+                <span className="text-xs">
+                  {sessionStats.sitesVisited} sites | {sessionStats.cookiesDetected} cookies | {sessionStats.trackersDetected} trackers
+                </span>
+              </Badge>
+            )}
             {sessionStats && sessionStats.isExpiringSoon && (
               <Badge variant="destructive" className="flex items-center gap-2">
                 <Clock className="h-3 w-3" />

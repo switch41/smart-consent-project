@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Search, Shield, Cookie, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useBrowserSession } from "@/hooks/use-browser-session";
 
 export function WebsiteScanner() {
   const [url, setUrl] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState<{ cookiesFound: number; trackersFound: number } | null>(null);
   const scanWebsite = useAction(api.websiteScannerPublic.scanWebsite);
+  const { trackSiteVisit } = useBrowserSession();
 
   const handleScan = async () => {
     if (!url) {
@@ -25,6 +27,10 @@ export function WebsiteScanner() {
     try {
       const scanResult = await scanWebsite({ url });
       setResult(scanResult);
+      
+      // Track the site visit in the browser session
+      await trackSiteVisit(url, scanResult.cookiesFound, scanResult.trackersFound);
+      
       toast.success("Website scan completed!");
     } catch (error) {
       console.error("Scan error:", error);
