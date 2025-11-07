@@ -21,6 +21,13 @@ export const predictTrackerRisk = action({
         requestPattern: args.requestPattern,
       });
 
+      const explanation = await ctx.runAction(internal.mlExplainability.explainTrackerClassification, {
+        domain: args.domain,
+        type: classification.type,
+        riskLevel: classification.riskLevel,
+        reasoning: classification.reasoning,
+      });
+
       return {
         success: true,
         prediction: {
@@ -28,9 +35,13 @@ export const predictTrackerRisk = action({
           riskLevel: classification.riskLevel,
           shouldBlock: classification.shouldBlock,
           confidence: classification.explainability.confidence,
-          reasoning: classification.reasoning,
         },
-        explainability: classification.explainability,
+        explanation: {
+          decision: explanation.decision,
+          confidence: explanation.confidence,
+          factors: explanation.reasoning,
+          alternatives: explanation.alternatives,
+        },
         modelInfo: classification.modelInfo,
       };
     } catch (error) {
@@ -62,16 +73,24 @@ export const predictPrivacyRisk = action({
 
     try {
       // Get user history for personalization
-      const userHistory = await ctx.runQuery(internal.mlPredictions.getUserHistory, {
-        userId: userId.subject,
+      const userHistory = await ctx.runQuery(internal.websites.internalGetUserHistory, {
+        userId: userId.subject as Id<"users">,
+        limit: 10,
       });
 
       const riskAnalysis = await ctx.runAction(internal.mlAnalysis.calculatePersonalizedRisk, {
-        userId: userId.subject,
+        userId: userId.subject as Id<"users">,
         websiteUrl: args.websiteUrl,
         cookieCount: args.cookieCount,
         trackerCount: args.trackerCount,
-        userHistory,
+        userHistory: userHistory || [],
+      });
+
+      const explanation = await ctx.runAction(internal.mlExplainability.explainRiskScore, {
+        score: riskAnalysis.score,
+        level: riskAnalysis.level,
+        factors: riskAnalysis.factors,
+        analysis: riskAnalysis.analysis,
       });
 
       return {
@@ -80,25 +99,32 @@ export const predictPrivacyRisk = action({
           score: riskAnalysis.score,
           level: riskAnalysis.level,
           factors: riskAnalysis.factors,
+          confidence: riskAnalysis.explainability.confidence,
         },
-        explainability: riskAnalysis.explainability,
+        explanation: {
+          decision: explanation.decision,
+          confidence: explanation.confidence,
+          reasoning: explanation.reasoning,
+          recommendations: riskAnalysis.explainability.recommendations,
+        },
         modelInfo: riskAnalysis.modelInfo,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Risk prediction failed",
+        error: error instanceof Error ? error.message : "Prediction failed",
         fallback: {
-          score: Math.min(100, (args.cookieCount * 3) + (args.trackerCount * 5)),
+          score: 50,
           level: "medium",
           factors: ["Standard risk assessment applied"],
+          confidence: 70,
         },
       };
     }
   },
 });
 
-export const analyzePolicy = action({
+export const analyzePrivacyPolicyText = action({
   args: {
     policyText: v.string(),
   },
@@ -111,21 +137,17 @@ export const analyzePolicy = action({
       return {
         success: true,
         analysis: analysis.analysis,
-        explainability: analysis.explainability,
         modelInfo: analysis.modelInfo,
+        explainability: analysis.explainability,
         timestamp: analysis.timestamp,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Policy analysis failed",
+        error: error instanceof Error ? error.message : "Analysis failed",
         fallback: {
           analysis: "Unable to analyze privacy policy at this time.",
-          explainability: {
-            method: "Fallback rule-based analysis",
-            features: ["Basic text parsing"],
-            confidence: 50,
-          },
+          confidence: 50,
         },
       };
     }

@@ -3,7 +3,7 @@ import { internalQuery } from "./_generated/server";
 
 export const getUserHistory = internalQuery({
   args: {
-    userId: v.string(),
+    userId: v.id("users"),
   },
   handler: async (ctx, args) => {
     const websites = await ctx.db
