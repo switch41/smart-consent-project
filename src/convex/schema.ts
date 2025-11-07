@@ -107,6 +107,20 @@ const schema = defineSchema(
     })
       .index("by_userId", ["userId"])
       .index("by_websiteId", ["websiteId"]),
+
+    browserSessions: defineTable({
+      userId: v.id("users"),
+      sessionId: v.string(),
+      startTime: v.number(),
+      lastActivity: v.number(),
+      isActive: v.boolean(),
+      cookiesDetected: v.number(),
+      trackersDetected: v.number(),
+      sitesVisited: v.array(v.string()),
+    })
+      .index("by_userId", ["userId"])
+      .index("by_sessionId", ["sessionId"])
+      .index("by_isActive", ["isActive"]),
   },
   {
     schemaValidation: false,

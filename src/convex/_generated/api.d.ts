@@ -16,6 +16,7 @@ import type {
 import type * as analytics from "../analytics.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
+import type * as browserSessions from "../browserSessions.js";
 import type * as consents from "../consents.js";
 import type * as cookies from "../cookies.js";
 import type * as gamification from "../gamification.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
+  browserSessions: typeof browserSessions;
   consents: typeof consents;
   cookies: typeof cookies;
   gamification: typeof gamification;

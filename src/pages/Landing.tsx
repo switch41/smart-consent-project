@@ -1,14 +1,17 @@
 import { motion } from "framer-motion";
-import { Shield, Cookie, Eye, Lock, TrendingUp, Users, Moon, Sun } from "lucide-react";
+import { Shield, Cookie, Eye, Lock, TrendingUp, Users, Moon, Sun, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useDarkMode } from "@/hooks/use-dark-mode";
+import { useBrowserSession } from "@/hooks/use-browser-session";
+import { Badge } from "@/components/ui/badge";
 
 export default function Landing() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { isDark, toggle } = useDarkMode();
+  const { sessionStats, isActive } = useBrowserSession();
 
   return (
     <motion.div
@@ -25,6 +28,14 @@ export default function Landing() {
             <h1 className="text-xl font-bold tracking-tight">Smart Consent Manager</h1>
           </div>
           <div className="flex items-center gap-3">
+            {isAuthenticated && isActive && sessionStats && (
+              <Badge variant="outline" className="flex items-center gap-2">
+                <Activity className="h-3 w-3 animate-pulse text-green-600" />
+                <span className="text-xs">
+                  Session: {sessionStats.sitesVisited} sites | {sessionStats.cookiesDetected} cookies | {sessionStats.trackersDetected} trackers
+                </span>
+              </Badge>
+            )}
             <Button
               variant="ghost"
               size="icon"
