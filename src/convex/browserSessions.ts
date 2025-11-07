@@ -2,6 +2,10 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUser } from "./users";
 
+// Session configuration
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const SESSION_WARNING_MS = 5 * 60 * 1000; // 5 minutes before expiration
+
 export const startSession = mutation({
   args: {},
   handler: async (ctx) => {
@@ -43,11 +47,22 @@ export const getActiveSession = query({
     const user = await getCurrentUser(ctx);
     if (!user) return null;
 
-    return await ctx.db
+    const session = await ctx.db
       .query("browserSessions")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .filter((q) => q.eq(q.field("isActive"), true))
       .first();
+
+    if (!session) return null;
+
+    // Check if session has expired (read-only check)
+    const timeSinceActivity = Date.now() - session.lastActivity;
+    if (timeSinceActivity > SESSION_TIMEOUT_MS) {
+      // Session is expired, return null (expiration handled by mutation)
+      return null;
+    }
+
+    return session;
   },
 });
 
@@ -124,8 +139,15 @@ export const getSessionStats = query({
 
     if (!activeSession) return null;
 
-    const duration = Date.now() - activeSession.startTime;
+    const now = Date.now();
+    const timeSinceActivity = now - activeSession.lastActivity;
+    const duration = now - activeSession.startTime;
     const durationMinutes = Math.floor(duration / 60000);
+    
+    // Check if session is about to expire
+    const timeUntilExpiration = SESSION_TIMEOUT_MS - timeSinceActivity;
+    const isExpiringSoon = timeUntilExpiration <= SESSION_WARNING_MS && timeUntilExpiration > 0;
+    const isExpired = timeSinceActivity > SESSION_TIMEOUT_MS;
 
     return {
       sessionId: activeSession.sessionId,
@@ -134,6 +156,34 @@ export const getSessionStats = query({
       cookiesDetected: activeSession.cookiesDetected,
       trackersDetected: activeSession.trackersDetected,
       startTime: activeSession.startTime,
+      lastActivity: activeSession.lastActivity,
+      timeUntilExpiration: Math.max(0, Math.floor(timeUntilExpiration / 1000)), // in seconds
+      isExpiringSoon,
+      isExpired,
     };
+  },
+});
+
+export const refreshSession = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("Unauthorized");
+
+    const session = await ctx.db
+      .query("browserSessions")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .first();
+
+    if (!session) {
+      throw new Error("No active session found");
+    }
+
+    await ctx.db.patch(session._id, {
+      lastActivity: Date.now(),
+    });
+
+    return { success: true };
   },
 });
