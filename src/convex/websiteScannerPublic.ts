@@ -8,16 +8,25 @@ export const scanWebsite = action({
     url: v.string(),
   },
   handler: async (ctx, args): Promise<{ cookiesFound: number; trackersFound: number }> => {
-    // Get current user
-    const userId = await ctx.auth.getUserIdentity();
-    if (!userId) {
-      throw new Error("Unauthorized");
+    // Get current user identity
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized - Please sign in to scan websites");
+    }
+
+    // Get the actual user document from the users table
+    const user = await ctx.runQuery(internal.users.getBySubject, {
+      subject: identity.subject,
+    });
+
+    if (!user) {
+      throw new Error("User not found - Please try signing in again");
     }
 
     // Check if website already exists
     const existingWebsite = await ctx.runQuery(internal.websites.internalGetByUrl, {
       url: args.url,
-      userId: userId.subject as Id<"users">,
+      userId: user._id,
     });
 
     let websiteId: Id<"websites">;
@@ -33,7 +42,7 @@ export const scanWebsite = action({
       websiteId = await ctx.runMutation(internal.websites.internalCreate, {
         url: args.url,
         name: args.url,
-        userId: userId.subject as Id<"users">,
+        userId: user._id,
       });
     }
 

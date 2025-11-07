@@ -1,5 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { query, QueryCtx } from "./_generated/server";
+import { query, QueryCtx, internalQuery } from "./_generated/server";
+import { v } from "convex/values";
 
 /**
  * Get the current signed in user. Returns null if the user is not signed in.
@@ -31,3 +32,22 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
   }
   return await ctx.db.get(userId);
 };
+
+export const getBySubject = internalQuery({
+  args: { subject: v.string() },
+  handler: async (ctx, args) => {
+    // The subject from auth identity corresponds to the tokenIdentifier
+    // We need to find the user by checking the authAccounts table
+    const authAccount = await ctx.db
+      .query("authAccounts")
+      .withIndex("userIdAndProvider")
+      .filter((q) => q.eq(q.field("providerAccountId"), args.subject))
+      .first();
+
+    if (!authAccount) {
+      return null;
+    }
+
+    return await ctx.db.get(authAccount.userId);
+  },
+});
