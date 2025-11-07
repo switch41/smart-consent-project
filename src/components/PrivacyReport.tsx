@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Shield, TrendingUp, Cookie, Eye, Globe, AlertTriangle } from "lucide-react";
+import { Shield, TrendingUp, Cookie, Eye, Globe, AlertTriangle, Info, Brain } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export function PrivacyReport() {
   const stats = useQuery(api.analytics.getDashboardStats);
@@ -25,8 +27,12 @@ export function PrivacyReport() {
           <CardTitle className="flex items-center gap-2">
             <Shield className={`h-6 w-6 ${scoreColor}`} />
             Privacy Score
+            <Badge variant="outline" className="ml-auto">
+              <Brain className="h-3 w-3 mr-1" />
+              ML-Powered
+            </Badge>
           </CardTitle>
-          <CardDescription>Your overall privacy health rating</CardDescription>
+          <CardDescription>Your overall privacy health rating with AI analysis</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -37,6 +43,38 @@ export function PrivacyReport() {
               </span>
             </div>
             <Progress value={privacyScore} className="h-3" />
+            
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="explainability">
+                <AccordionTrigger className="text-sm">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4" />
+                    How is this score calculated?
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="font-medium mb-2">Score Components:</p>
+                      <ul className="space-y-1 ml-4">
+                        <li>• Denied consents: +5 points each</li>
+                        <li>• Blocked trackers: +3 points each</li>
+                        <li>• Active consent management: +10 bonus</li>
+                        <li>• High-risk sites: -10 points each</li>
+                        <li>• Unblocked trackers: -2 points each</li>
+                      </ul>
+                    </div>
+                    <div className="pt-2 border-t">
+                      <p className="font-medium mb-1">ML Enhancement:</p>
+                      <p className="text-muted-foreground">
+                        Our AI models analyze your browsing patterns and provide personalized risk assessments
+                        based on tracker behavior, cookie usage, and historical data.
+                      </p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </CardContent>
       </Card>
