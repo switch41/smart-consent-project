@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
-import { Shield, Cookie, Eye, Lock, TrendingUp, Users } from "lucide-react";
+import { Shield, Cookie, Eye, Lock, TrendingUp, Users, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { useDarkMode } from "@/hooks/use-dark-mode";
 
 export default function Landing() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { isDark, toggle } = useDarkMode();
 
   return (
     <motion.div
@@ -22,9 +24,20 @@ export default function Landing() {
             <img src="./logo.svg" alt="Logo" className="h-8 w-8 cursor-pointer" onClick={() => navigate("/")} />
             <h1 className="text-xl font-bold tracking-tight">Smart Consent Manager</h1>
           </div>
-          <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")}>
-            {isAuthenticated ? "Dashboard" : "Get Started"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggle}
+              className="rounded-full"
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")}>
+              {isAuthenticated ? "Dashboard" : "Get Started"}
+            </Button>
+          </div>
         </div>
       </header>
 

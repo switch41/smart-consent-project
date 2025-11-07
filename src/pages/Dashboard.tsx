@@ -4,18 +4,20 @@ import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Cookie, Eye, TrendingUp } from "lucide-react";
+import { Shield, Cookie, Eye, TrendingUp, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WebsiteScanner } from "@/components/WebsiteScanner";
 import { ConsentManager } from "@/components/ConsentManager";
 import { PrivacyReport } from "@/components/PrivacyReport";
+import { useDarkMode } from "@/hooks/use-dark-mode";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
   const navigate = useNavigate();
   const stats = useQuery(api.analytics.getDashboardStats);
   const [activeTab, setActiveTab] = useState("overview");
+  const { isDark, toggle } = useDarkMode();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -39,9 +41,20 @@ export default function Dashboard() {
             <img src="./logo.svg" alt="Logo" className="h-8 w-8 cursor-pointer" onClick={() => navigate("/")} />
             <h1 className="text-xl font-bold tracking-tight">Smart Consent Manager</h1>
           </div>
-          <Button variant="outline" onClick={() => signOut()}>
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggle}
+              className="rounded-full"
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+            <Button variant="outline" onClick={() => signOut()}>
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
