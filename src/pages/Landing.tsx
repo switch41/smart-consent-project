@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useDarkMode } from "@/hooks/use-dark-mode";
 import { useBrowserSession } from "@/hooks/use-browser-session";
 import { Badge } from "@/components/ui/badge";
-import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -144,9 +143,6 @@ export default function Landing() {
           <p>© 2024 Smart Consent Manager. Built with privacy in mind.</p>
         </div>
       </footer>
-
-      {/* Cookie Consent Banner */}
-      <CookieConsentBanner />
     </motion.div>
   );
 }
