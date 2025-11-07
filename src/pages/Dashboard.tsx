@@ -14,6 +14,7 @@ import { useDarkMode } from "@/hooks/use-dark-mode";
 import { ModelInteraction } from "@/components/ModelInteraction";
 import { useBrowserSession } from "@/hooks/use-browser-session";
 import { Badge } from "@/components/ui/badge";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
@@ -196,6 +197,8 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <CookieConsentBanner />
     </div>
   );
 }
