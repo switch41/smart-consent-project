@@ -90,7 +90,7 @@ http.route({
         );
       }
 
-      const result = await ctx.runAction(api.mlPredictions.analyzePolicy, {
+      const result = await ctx.runAction(api.mlPredictions.analyzePrivacyPolicyText, {
         policyText,
       });
 

@@ -35,7 +35,7 @@ export function ModelInteraction() {
   const [policyText, setPolicyText] = useState("");
   const [policyResult, setPolicyResult] = useState<any>(null);
   const [isPolicyLoading, setIsPolicyLoading] = useState(false);
-  const analyzePolicy = useAction(api.mlPredictions.analyzePolicy);
+  const analyzePolicy = useAction(api.mlPredictions.analyzePrivacyPolicyText);
 
   const handleTrackerPrediction = async () => {
     if (!trackerDomain || !requestPattern) {

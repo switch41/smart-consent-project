@@ -3,6 +3,7 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 /**
  * Public API endpoint for ML predictions
@@ -14,14 +15,14 @@ export const predictTrackerRisk = action({
     domain: v.string(),
     requestPattern: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     try {
-      const classification = await ctx.runAction(internal.mlAnalysis.classifyTracker, {
+      const classification: any = await ctx.runAction(internal.mlAnalysis.classifyTracker, {
         domain: args.domain,
         requestPattern: args.requestPattern,
       });
 
-      const explanation = await ctx.runAction(internal.mlExplainability.explainTrackerClassification, {
+      const explanation: any = await ctx.runAction(internal.mlExplainability.explainTrackerClassification, {
         domain: args.domain,
         type: classification.type,
         riskLevel: classification.riskLevel,
@@ -65,7 +66,7 @@ export const predictPrivacyRisk = action({
     cookieCount: v.number(),
     trackerCount: v.number(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     const userId = await ctx.auth.getUserIdentity();
     if (!userId) {
       throw new Error("Unauthorized");
@@ -73,20 +74,20 @@ export const predictPrivacyRisk = action({
 
     try {
       // Get user history for personalization
-      const userHistory = await ctx.runQuery(internal.websites.internalGetUserHistory, {
-        userId: userId.subject as Id<"users">,
+      const userHistory: any = await ctx.runQuery(internal.websites.internalGetUserHistory, {
+        userId: userId.subject as any as Id<"users">,
         limit: 10,
       });
 
-      const riskAnalysis = await ctx.runAction(internal.mlAnalysis.calculatePersonalizedRisk, {
-        userId: userId.subject as Id<"users">,
+      const riskAnalysis: any = await ctx.runAction(internal.mlAnalysis.calculatePersonalizedRisk, {
+        userId: userId.subject as any as Id<"users">,
         websiteUrl: args.websiteUrl,
         cookieCount: args.cookieCount,
         trackerCount: args.trackerCount,
         userHistory: userHistory || [],
       });
 
-      const explanation = await ctx.runAction(internal.mlExplainability.explainRiskScore, {
+      const explanation: any = await ctx.runAction(internal.mlExplainability.explainRiskScore, {
         score: riskAnalysis.score,
         level: riskAnalysis.level,
         factors: riskAnalysis.factors,
@@ -128,9 +129,9 @@ export const analyzePrivacyPolicyText = action({
   args: {
     policyText: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     try {
-      const analysis = await ctx.runAction(internal.mlAnalysis.analyzePrivacyPolicy, {
+      const analysis: any = await ctx.runAction(internal.mlAnalysis.analyzePrivacyPolicy, {
         policyText: args.policyText,
       });
 
