@@ -26,6 +26,7 @@ import type * as mlExplainability from "../mlExplainability.js";
 import type * as mlPredictions from "../mlPredictions.js";
 import type * as mlPredictionsHelpers from "../mlPredictionsHelpers.js";
 import type * as privacyScore from "../privacyScore.js";
+import type * as reports from "../reports.js";
 import type * as riskAssessments from "../riskAssessments.js";
 import type * as seedData from "../seedData.js";
 import type * as trackers from "../trackers.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   mlPredictions: typeof mlPredictions;
   mlPredictionsHelpers: typeof mlPredictionsHelpers;
   privacyScore: typeof privacyScore;
+  reports: typeof reports;
   riskAssessments: typeof riskAssessments;
   seedData: typeof seedData;
   trackers: typeof trackers;

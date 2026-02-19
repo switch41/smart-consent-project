@@ -1,17 +1,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Shield, TrendingUp, Cookie, Eye, Globe, AlertTriangle, Info, Brain } from "lucide-react";
+import { Shield, TrendingUp, Cookie, Eye, Globe, AlertTriangle, Info, Brain, Download, Table as TableIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function PrivacyReport() {
   const stats = useQuery(api.analytics.getDashboardStats);
-  const websites = useQuery(api.websites.list);
-  const cookieStats = useQuery(api.cookies.getStats, {});
-
+  const reportData = useQuery(api.reports.getReportData, {});
+  
   if (!stats) {
     return <div>Loading...</div>;
   }
@@ -20,8 +29,72 @@ export function PrivacyReport() {
   const scoreColor =
     privacyScore >= 70 ? "text-green-600" : privacyScore >= 40 ? "text-yellow-600" : "text-red-600";
 
+  // Calculate cookie stats from report data
+  const cookieStats = reportData?.reduce(
+    (acc, data) => {
+      data.cookies.forEach((c) => {
+        if (c.isThirdParty) acc.thirdParty++;
+      });
+      return acc;
+    },
+    { thirdParty: 0 }
+  );
+
+  const handleExportCSV = () => {
+    if (!reportData) return;
+
+    const headers = ["Website", "Type", "Name/Domain", "Category/Type", "Status/Risk", "Details"];
+    const rows: string[][] = [];
+
+    reportData.forEach((data) => {
+      // Add Cookies
+      data.cookies.forEach((cookie) => {
+        rows.push([
+          data.website.url,
+          "Cookie",
+          cookie.name,
+          cookie.category,
+          "Detected",
+          cookie.purpose || "N/A"
+        ]);
+      });
+
+      // Add Trackers
+      data.trackers.forEach((tracker) => {
+        rows.push([
+          data.website.url,
+          "Tracker",
+          tracker.domain,
+          tracker.type,
+          tracker.blocked ? "Blocked" : "Allowed",
+          tracker.riskLevel || "N/A"
+        ]);
+      });
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "privacy_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold tracking-tight">Privacy Report</h2>
+        <Button onClick={handleExportCSV} disabled={!reportData || reportData.length === 0}>
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -171,6 +244,108 @@ export function PrivacyReport() {
           </Card>
         </motion.div>
       </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TableIcon className="h-5 w-5" />
+            Detailed Findings
+          </CardTitle>
+          <CardDescription>
+            Comprehensive list of all detected cookies and trackers across scanned websites
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="trackers" className="w-full">
+            <TabsList>
+              <TabsTrigger value="trackers">Trackers Detected</TabsTrigger>
+              <TabsTrigger value="cookies">Cookies Found</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="trackers">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Website</TableHead>
+                      <TableHead>Domain</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Risk Level</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportData?.flatMap((data) =>
+                      data.trackers.map((tracker, i) => (
+                        <TableRow key={`${data.website._id}-tracker-${i}`}>
+                          <TableCell className="font-medium">{data.website.url}</TableCell>
+                          <TableCell>{tracker.domain}</TableCell>
+                          <TableCell>{tracker.type}</TableCell>
+                          <TableCell>
+                            <Badge variant={tracker.blocked ? "destructive" : "outline"}>
+                              {tracker.blocked ? "Blocked" : "Allowed"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{tracker.riskLevel || "Unknown"}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                    {(!reportData || reportData.length === 0) && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                          No trackers detected yet. Scan a website to see results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="cookies">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Website</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Domain</TableHead>
+                      <TableHead>Purpose</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportData?.flatMap((data) =>
+                      data.cookies.map((cookie, i) => (
+                        <TableRow key={`${data.website._id}-cookie-${i}`}>
+                          <TableCell className="font-medium">{data.website.url}</TableCell>
+                          <TableCell className="font-mono text-xs">{cookie.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{cookie.category}</Badge>
+                          </TableCell>
+                          <TableCell>{cookie.domain}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {cookie.purpose || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                    {(!reportData || reportData.length === 0) && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                          No cookies detected yet. Scan a website to see results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }

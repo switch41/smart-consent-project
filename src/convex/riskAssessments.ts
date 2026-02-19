@@ -30,6 +30,7 @@ export const create = mutation({
     riskLevel: riskLevelValidator,
     factors: v.array(v.string()),
     score: v.number(),
+    details: v.string(),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -45,7 +46,8 @@ export const create = mutation({
         riskLevel: args.riskLevel,
         factors: args.factors,
         score: args.score,
-        assessedAt: Date.now(),
+        details: args.details,
+        timestamp: Date.now(),
       });
       return existing._id;
     }
@@ -56,7 +58,8 @@ export const create = mutation({
       riskLevel: args.riskLevel,
       factors: args.factors,
       score: args.score,
-      assessedAt: Date.now(),
+      details: args.details,
+      timestamp: Date.now(),
     });
   },
 });

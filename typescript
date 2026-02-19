@@ -1,0 +1,22 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Shield, TrendingUp, Cookie, Eye, Globe, AlertTriangle, Info, Brain, Download, Table as TableIcon } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+export default defineSchema({
+  // ...
+})

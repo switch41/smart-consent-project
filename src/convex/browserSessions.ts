@@ -25,16 +25,18 @@ export const startSession = mutation({
     }
 
     // Create new session
+    const now = Date.now();
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const sessionDocId = await ctx.db.insert("browserSessions", {
       userId: user._id,
       sessionId,
-      startTime: Date.now(),
-      lastActivity: Date.now(),
+      startTime: now,
+      lastActivity: now,
       isActive: true,
       cookiesDetected: 0,
       trackersDetected: 0,
       sitesVisited: [],
+      isExpiringSoon: false,
     });
 
     return { sessionId, sessionDocId };

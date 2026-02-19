@@ -1,32 +1,41 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
+import { cookieCategoryValidator } from "./schema";
 
 export const storeCookie = internalMutation({
   args: {
     websiteId: v.id("websites"),
     name: v.string(),
-    category: v.union(
-      v.literal("essential"),
-      v.literal("analytics"),
-      v.literal("marketing"),
-      v.literal("thirdParty")
-    ),
     domain: v.string(),
+    category: cookieCategoryValidator,
     isThirdParty: v.boolean(),
     purpose: v.optional(v.string()),
+    expirationDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const website = await ctx.db.get(args.websiteId);
     if (!website) throw new Error("Website not found");
-    
+
+    // Check if cookie already exists
+    const existing = await ctx.db
+      .query("cookies")
+      .withIndex("by_websiteId", (q) => q.eq("websiteId", args.websiteId))
+      .filter((q) => q.eq(q.field("name"), args.name))
+      .first();
+
+    if (existing) {
+      return existing._id;
+    }
+
     return await ctx.db.insert("cookies", {
       userId: website.userId,
       websiteId: args.websiteId,
       name: args.name,
-      category: args.category,
       domain: args.domain,
+      category: args.category,
       isThirdParty: args.isThirdParty,
       purpose: args.purpose,
+      expirationDate: args.expirationDate,
     });
   },
 });
@@ -34,21 +43,33 @@ export const storeCookie = internalMutation({
 export const storeTracker = internalMutation({
   args: {
     websiteId: v.id("websites"),
-    type: v.string(),
     domain: v.string(),
+    type: v.string(),
     blocked: v.boolean(),
+    riskLevel: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const website = await ctx.db.get(args.websiteId);
     if (!website) throw new Error("Website not found");
-    
+
+    // Check if tracker already exists
+    const existing = await ctx.db
+      .query("trackers")
+      .withIndex("by_websiteId", (q) => q.eq("websiteId", args.websiteId))
+      .filter((q) => q.eq(q.field("domain"), args.domain))
+      .first();
+
+    if (existing) {
+      return existing._id;
+    }
+
     return await ctx.db.insert("trackers", {
       userId: website.userId,
       websiteId: args.websiteId,
-      type: args.type,
       domain: args.domain,
+      type: args.type,
       blocked: args.blocked,
-      detectedAt: Date.now(),
+      riskLevel: args.riskLevel,
     });
   },
 });
@@ -62,40 +83,32 @@ export const assessRisk = internalMutation({
   handler: async (ctx, args) => {
     const website = await ctx.db.get(args.websiteId);
     if (!website) throw new Error("Website not found");
+
+    // Simple risk assessment logic
+    let score = 100;
+    let riskLevel = "Low";
+
+    // Deduct points for trackers
+    score -= args.trackerCount * 5;
     
-    const score = calculateRiskScore(args.cookieCount, args.trackerCount);
-    const riskLevel = getRiskLevel(score);
-    const factors = generateRiskFactors(args.cookieCount, args.trackerCount);
-    
+    // Deduct points for cookies
+    score -= args.cookieCount * 1;
+
+    // Normalize score
+    score = Math.max(0, Math.min(100, score));
+
+    // Determine risk level
+    if (score < 50) riskLevel = "Critical";
+    else if (score < 70) riskLevel = "High";
+    else if (score < 90) riskLevel = "Medium";
+
     return await ctx.db.insert("riskAssessments", {
       userId: website.userId,
       websiteId: args.websiteId,
       riskLevel,
-      factors,
       score,
-      assessedAt: Date.now(),
+      details: `Detected ${args.cookieCount} cookies and ${args.trackerCount} trackers.`,
+      timestamp: Date.now(),
     });
   },
 });
-
-function calculateRiskScore(cookieCount: number, trackerCount: number): number {
-  return Math.min(100, (cookieCount * 3) + (trackerCount * 5));
-}
-
-function getRiskLevel(score: number): "low" | "medium" | "high" | "critical" {
-  if (score < 25) return "low";
-  if (score < 50) return "medium";
-  if (score < 75) return "high";
-  return "critical";
-}
-
-function generateRiskFactors(cookieCount: number, trackerCount: number): Array<string> {
-  const factors: Array<string> = [];
-  
-  if (cookieCount > 10) factors.push("High number of cookies detected");
-  if (trackerCount > 5) factors.push("Multiple third-party trackers found");
-  if (cookieCount > 15) factors.push("Excessive data collection");
-  if (trackerCount > 8) factors.push("Aggressive tracking behavior");
-  
-  return factors.length > 0 ? factors : ["Normal tracking behavior"];
-}

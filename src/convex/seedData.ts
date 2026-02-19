@@ -31,7 +31,7 @@ export const seed = mutation({
       domain: "example.com",
       isThirdParty: false,
       purpose: "Session management",
-      expiryDate: Date.now() + 86400000 * 30,
+      expirationDate: Date.now() + 86400000 * 30,
     });
 
     await ctx.db.insert("cookies", {
@@ -42,7 +42,7 @@ export const seed = mutation({
       domain: "example.com",
       isThirdParty: true,
       purpose: "Google Analytics tracking",
-      expiryDate: Date.now() + 86400000 * 730,
+      expirationDate: Date.now() + 86400000 * 730,
     });
 
     await ctx.db.insert("trackers", {
@@ -84,10 +84,11 @@ export const seed = mutation({
     await ctx.db.insert("riskAssessments", {
       userId: user._id,
       websiteId: website1,
-      riskLevel: "medium",
+      riskLevel: "Medium",
       factors: ["Third-party cookies", "Analytics tracking"],
       score: 65,
-      assessedAt: Date.now(),
+      details: "Initial risk assessment based on seed data.",
+      timestamp: Date.now(),
     });
 
     await ctx.db.patch(user._id, {
